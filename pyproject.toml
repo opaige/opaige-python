@@ -10,8 +10,8 @@ dependencies = []
 
 [project.urls]
 Homepage = "https://opaige.com/developers"
-Source = "https://github.com/HideOsLite/opaige-python"
-Issues = "https://github.com/HideOsLite/opaige-python/issues"
+Source = "https://github.com/opaige/opaige-python"
+Issues = "https://github.com/opaige/opaige-python/issues"
 
 [build-system]
 requires = ["setuptools>=77"]
