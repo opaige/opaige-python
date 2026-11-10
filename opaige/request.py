@@ -8,7 +8,7 @@ import urllib.parse
 import urllib.request
 from typing import Any, Dict, Optional
 
-VERSION = "1.1.0"
+VERSION = "2.0.0"
 _RETRY = {429, 500, 502, 503, 504}
 
 

@@ -49,6 +49,14 @@ class Operations:
         """An itinerary, cover letter, submission brief or third-party letter. POST /documents"""
         return self._http.request("POST", f"/documents", query={"format": format}, body=body)
 
+    def get_fee_balance(self) -> Any:
+        """Your government fee balance, and what each route asks for. GET /fee-balance"""
+        return self._http.request("GET", f"/fee-balance", query=None)
+
+    def create_fee_top_up(self, *, body: Dict[str, Any], idempotency_key: Optional[str] = None) -> Any:
+        """Ask to add to the balance by bank transfer; a person confirms the money before it counts. POST /fee-balance/top-ups"""
+        return self._http.request("POST", f"/fee-balance/top-ups", query=None, body=body, idempotency_key=idempotency_key)
+
     def review_file(self, *, body: Optional[Dict[str, Any]] = None, file: Optional[bytes] = None, filename: str = "file.pdf", fields: Optional[Dict[str, str]] = None, idempotency_key: Optional[str] = None) -> Any:
         """Every inconsistency in a whole visa file. POST /file-review"""
         return self._http.request("POST", f"/file-review", query=None, body=body, file=file, filename=filename, fields=fields, idempotency_key=idempotency_key)
@@ -72,30 +80,6 @@ class Operations:
     def list_invoices(self, *, status: Optional[Union[str, int]] = None, from_: Optional[Union[str, int]] = None, to: Optional[Union[str, int]] = None) -> Any:
         """Every case billed, due or paid. GET /invoices"""
         return self._http.request("GET", f"/invoices", query={"status": status, "from": from_, "to": to})
-
-    def list_lodgements(self) -> Any:
-        """Your lodgements, newest first. GET /lodgements"""
-        return self._http.request("GET", f"/lodgements", query=None)
-
-    def create_lodgement(self, *, body: Dict[str, Any], idempotency_key: Optional[str] = None) -> Any:
-        """Fill a visa application on the government portal, parked before the declarations (au-600, au-500) or the photo and signature (us-ds160). POST /lodgements"""
-        return self._http.request("POST", f"/lodgements", query=None, body=body, idempotency_key=idempotency_key)
-
-    def get_lodgement(self, *, id: str) -> Any:
-        """Where a lodgement stands, with the government reference once there is one. GET /lodgements/{id}"""
-        return self._http.request("GET", f"/lodgements/{_q(id)}", query=None)
-
-    def attach_lodgement_documents(self, *, id: str, body: Dict[str, Any]) -> Any:
-        """Attach supporting documents. POST /lodgements/{id}/documents"""
-        return self._http.request("POST", f"/lodgements/{_q(id)}/documents", query=None, body=body)
-
-    def submit_lodgement(self, *, id: str, body: Dict[str, Any], idempotency_key: Optional[str] = None) -> Any:
-        """Lodge and pay the government fee (requires authorize: true). POST /lodgements/{id}/submit"""
-        return self._http.request("POST", f"/lodgements/{_q(id)}/submit", query=None, body=body, idempotency_key=idempotency_key)
-
-    def lodgement_questions(self, *, visa: Optional[Union[str, int]] = None, purpose: Optional[Union[str, int]] = None) -> Any:
-        """The questions a DS-160 lodgement answers, as a case asks them. GET /lodgements/questions"""
-        return self._http.request("GET", f"/lodgements/questions", query={"visa": visa, "purpose": purpose})
 
     def check_passengers(self, *, body: Dict[str, Any]) -> Any:
         """Who on a flight needs a visa, and by when to file. POST /passengers/check"""
@@ -137,6 +121,50 @@ class Operations:
         """Rule changes announced, in force or coming up. GET /rules/notices"""
         return self._http.request("GET", f"/rules/notices", query={"since": since})
 
+    def prepare_skilled_application(self, *, body: Dict[str, Any]) -> Any:
+        """Prepare a skilled application (Australia 189/190/491, Canada Express Entry, Germany EU Blue Card, UK Skilled Worker): every field filled or marked missing, the claim worked from what the profile proves, each fact tied to its document (billed as one form). POST /skilled/applications"""
+        return self._http.request("POST", f"/skilled/applications", query=None, body=body)
+
+    def check_blue_card(self, *, body: Dict[str, Any]) -> Any:
+        """Check EU Blue Card eligibility for Germany (qualification, job offer, salary threshold). POST /skilled/blue-card-check"""
+        return self._http.request("POST", f"/skilled/blue-card-check", query=None, body=body)
+
+    def blue_card_checklist(self, *, body: Dict[str, Any]) -> Any:
+        """The documents a Germany EU Blue Card application asks for, tailored to the candidate. POST /skilled/blue-card-checklist"""
+        return self._http.request("POST", f"/skilled/blue-card-checklist", query=None, body=body)
+
+    def check_crs_points(self, *, body: Dict[str, Any]) -> Any:
+        """Score a candidate on Canada's Express Entry Comprehensive Ranking System (CRS), out of 1200. POST /skilled/crs-check"""
+        return self._http.request("POST", f"/skilled/crs-check", query=None, body=body)
+
+    def skilled_document_checklist(self, *, body: Dict[str, Any]) -> Any:
+        """The documents an Australian skilled application (189, 190, 491) asks for, tailored to the applicant. POST /skilled/document-checklist"""
+        return self._http.request("POST", f"/skilled/document-checklist", query=None, body=body)
+
+    def express_entry_checklist(self, *, body: Dict[str, Any]) -> Any:
+        """The documents a Canada Express Entry application (FSW, CEC, FST) asks for, tailored to the candidate. POST /skilled/express-entry-checklist"""
+        return self._http.request("POST", f"/skilled/express-entry-checklist", query=None, body=body)
+
+    def check_h1b(self, *, body: Dict[str, Any]) -> Any:
+        """Check US H-1B eligibility: specialty occupation, degree or 3-for-1 equivalency, prevailing wage level, cap pool and weighted-selection entries. POST /skilled/h1b-check"""
+        return self._http.request("POST", f"/skilled/h1b-check", query=None, body=body)
+
+    def h1b_checklist(self, *, body: Dict[str, Any]) -> Any:
+        """The documents a US H-1B petition is built from, tailored to the case. POST /skilled/h1b-checklist"""
+        return self._http.request("POST", f"/skilled/h1b-checklist", query=None, body=body)
+
+    def check_skilled_points(self, *, body: Dict[str, Any]) -> Any:
+        """Score a person on Australia's General Skilled Migration points test (subclasses 189, 190, 491). POST /skilled/points-check"""
+        return self._http.request("POST", f"/skilled/points-check", query=None, body=body)
+
+    def check_skilled_worker(self, *, body: Dict[str, Any]) -> Any:
+        """Check UK Skilled Worker eligibility (sponsor, skill level, and the higher of the general threshold and the going rate). POST /skilled/uk-skilled-worker-check"""
+        return self._http.request("POST", f"/skilled/uk-skilled-worker-check", query=None, body=body)
+
+    def uk_skilled_worker_checklist(self, *, body: Dict[str, Any]) -> Any:
+        """The documents a UK Skilled Worker application asks for, tailored to the candidate. POST /skilled/uk-skilled-worker-checklist"""
+        return self._http.request("POST", f"/skilled/uk-skilled-worker-checklist", query=None, body=body)
+
     def list_students(self) -> Any:
         """Admitted students, with the visa stage where each agreed to share it. GET /students"""
         return self._http.request("GET", f"/students", query=None)
@@ -152,6 +180,50 @@ class Operations:
     def student_funds_check(self, *, body: Dict[str, Any]) -> Any:
         """A student’s money against the study country’s rules (GB, CA, AU, US), each finding with its source. POST /students/funds-check"""
         return self._http.request("POST", f"/students/funds-check", query=None, body=body)
+
+    def list_submissions(self) -> Any:
+        """Your submissions, newest first. GET /submissions"""
+        return self._http.request("GET", f"/submissions", query=None)
+
+    def create_submission(self, *, body: Dict[str, Any], idempotency_key: Optional[str] = None) -> Any:
+        """Fill a visa application on the government portal, stopping before the declarations (au-600, au-500), at the applicant's signature (us-ds160), or completed with its reference (fr-schengen). POST /submissions"""
+        return self._http.request("POST", f"/submissions", query=None, body=body, idempotency_key=idempotency_key)
+
+    def get_submission(self, *, id: str) -> Any:
+        """Where a submission stands, with the government reference once there is one. GET /submissions/{id}"""
+        return self._http.request("GET", f"/submissions/{_q(id)}", query=None)
+
+    def send_submission_code(self, *, id: str, body: Dict[str, Any]) -> Any:
+        """us-ds160 with code_by partner: the US site's security code your staff read in code.image. POST /submissions/{id}/code"""
+        return self._http.request("POST", f"/submissions/{_q(id)}/code", query=None, body=body)
+
+    def attach_submission_documents(self, *, id: str, body: Dict[str, Any]) -> Any:
+        """Attach supporting documents. POST /submissions/{id}/documents"""
+        return self._http.request("POST", f"/submissions/{_q(id)}/documents", query=None, body=body)
+
+    def get_filed_document(self, *, id: str, kind: str) -> Any:
+        """us-ds160: the US site's own PDF once submitted: the confirmation, or the full application as submitted. GET /submissions/{id}/filed/{kind}"""
+        return self._http.request("GET", f"/submissions/{_q(id)}/filed/{_q(kind)}", query=None)
+
+    def submit_and_pay(self, *, id: str, body: Dict[str, Any], idempotency_key: Optional[str] = None) -> Any:
+        """Submit and pay the government fee (requires authorize: true). POST /submissions/{id}/submit"""
+        return self._http.request("POST", f"/submissions/{_q(id)}/submit", query=None, body=body, idempotency_key=idempotency_key)
+
+    def create_intake(self, *, body: Dict[str, Any]) -> Any:
+        """us-ds160: a hosted link where the applicant completes what you do not hold, with their passport and photo, and signs. POST /submissions/intakes"""
+        return self._http.request("POST", f"/submissions/intakes", query=None, body=body)
+
+    def get_intake(self, *, id: str) -> Any:
+        """Whether the applicant has finished, and the submission it became. GET /submissions/intakes/{id}"""
+        return self._http.request("GET", f"/submissions/intakes/{_q(id)}", query=None)
+
+    def submission_questions(self, *, visa: Optional[Union[str, int]] = None, purpose: Optional[Union[str, int]] = None) -> Any:
+        """The questions a DS-160 submission answers, as a case asks them. GET /submissions/questions"""
+        return self._http.request("GET", f"/submissions/questions", query={"visa": visa, "purpose": purpose})
+
+    def retrieve_ds160(self, *, body: Dict[str, Any], idempotency_key: Optional[str] = None) -> Any:
+        """us-ds160: open an application already on the US site with its recovery details and print its confirmation again (not billed). POST /submissions/retrieve"""
+        return self._http.request("POST", f"/submissions/retrieve", query=None, body=body, idempotency_key=idempotency_key)
 
     def list_trips(self, *, status: Optional[Union[str, int]] = None, updated_since: Optional[Union[str, int]] = None) -> Any:
         """Trips and where each case stands. GET /trips"""
