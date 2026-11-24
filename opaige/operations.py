@@ -9,6 +9,18 @@ class Operations:
     def __init__(self, http: Requester) -> None:
         self._http = http
 
+    def list_site_applications(self) -> Any:
+        """Applications received from your website, newest first. GET /applications"""
+        return self._http.request("GET", f"/applications", query=None)
+
+    def submit_site_application(self, *, body: Dict[str, Any]) -> Any:
+        """An application from an agency's own website: travellers on the client list and the documents, waiting in Online applications for Start. POST /applications"""
+        return self._http.request("POST", f"/applications", query=None, body=body)
+
+    def track_site_application(self, *, body: Dict[str, Any]) -> Any:
+        """From an agency's own website: where an application is, by its reference and the phone number it was sent with. POST /applications/track"""
+        return self._http.request("POST", f"/applications/track", query=None, body=body)
+
     def list_appointments(self, *, date: Optional[Union[str, int]] = None) -> Any:
         """A day’s appointments with the file state and the counter stage. GET /appointments"""
         return self._http.request("GET", f"/appointments", query={"date": date})
@@ -46,7 +58,7 @@ class Operations:
         return self._http.request("POST", f"/cases/{_q(id)}/file", query=None)
 
     def make_document(self, *, body: Dict[str, Any], format: Optional[Union[str, int]] = None) -> Any:
-        """An itinerary, cover letter, submission brief or third-party letter. POST /documents"""
+        """An itinerary (free), or a cover letter, submission brief or third-party letter ($1). POST /documents"""
         return self._http.request("POST", f"/documents", query={"format": format}, body=body)
 
     def get_fee_balance(self) -> Any:
@@ -77,9 +89,17 @@ class Operations:
         """The official visa form, filled from answers. POST /forms"""
         return self._http.request("POST", f"/forms", query={"format": format}, body=body)
 
+    def read_id_card(self, *, file: Optional[bytes] = None, filename: str = "file.pdf", fields: Optional[Dict[str, str]] = None) -> Any:
+        """A national identity card read from photos (Pakistan CNIC and NICOP). POST /id-cards"""
+        return self._http.request("POST", f"/id-cards", query=None, file=file, filename=filename, fields=fields)
+
     def list_invoices(self, *, status: Optional[Union[str, int]] = None, from_: Optional[Union[str, int]] = None, to: Optional[Union[str, int]] = None) -> Any:
         """Every case billed, due or paid. GET /invoices"""
         return self._http.request("GET", f"/invoices", query={"status": status, "from": from_, "to": to})
+
+    def get_member_card(self, *, site: Optional[Union[str, int]] = None, card: Optional[Union[str, int]] = None) -> Any:
+        """From an agency's own website: a club member's own card, from the card link the agency sent her. GET /member-card"""
+        return self._http.request("GET", f"/member-card", query={"site": site, "card": card})
 
     def check_passengers(self, *, body: Dict[str, Any]) -> Any:
         """Who on a flight needs a visa, and by when to file. POST /passengers/check"""
@@ -101,6 +121,10 @@ class Operations:
         """Stages of passengers who chose to share. GET /passengers/status"""
         return self._http.request("GET", f"/passengers/status", query={"ref": ref})
 
+    def read_passport(self, *, file: Optional[bytes] = None, filename: str = "file.pdf", fields: Optional[Dict[str, str]] = None) -> Any:
+        """A passport read from a photo or scan of its identity page and machine-readable zone. POST /passports"""
+        return self._http.request("POST", f"/passports", query=None, file=file, filename=filename, fields=fields)
+
     def check_requirements(self, *, passport: Optional[Union[str, int]] = None, destination: Optional[Union[str, int]] = None, residence: Optional[Union[str, int]] = None, stay_days: Optional[Union[str, int]] = None) -> Any:
         """What a passport needs for a destination. GET /requirements"""
         return self._http.request("GET", f"/requirements", query={"passport": passport, "destination": destination, "residence": residence, "stay_days": stay_days})
@@ -120,6 +144,10 @@ class Operations:
     def list_rule_notices(self, *, since: Optional[Union[str, int]] = None) -> Any:
         """Rule changes announced, in force or coming up. GET /rules/notices"""
         return self._http.request("GET", f"/rules/notices", query={"since": since})
+
+    def join_site_list(self, *, body: Dict[str, Any]) -> Any:
+        """From an agency's own website: someone asks to be told when something happens (first: the office opening). POST /site-subscribers"""
+        return self._http.request("POST", f"/site-subscribers", query=None, body=body)
 
     def prepare_skilled_application(self, *, body: Dict[str, Any]) -> Any:
         """Prepare a skilled application (Australia 189/190/491, Canada Express Entry, Germany EU Blue Card, UK Skilled Worker): every field filled or marked missing, the claim worked from what the profile proves, each fact tied to its document (billed as one form). POST /skilled/applications"""
@@ -186,12 +214,16 @@ class Operations:
         return self._http.request("GET", f"/submissions", query=None)
 
     def create_submission(self, *, body: Dict[str, Any], idempotency_key: Optional[str] = None) -> Any:
-        """Fill a visa application on the government portal, stopping before the declarations (au-600, au-500), at the applicant's signature (us-ds160), or completed with its reference (fr-schengen). POST /submissions"""
+        """Fill a visa application on the government portal, stopping before the declarations (au-600, au-500), at the applicant's signature (us-ds160), at the declaration with its GWF reference (uk-visitor), or completed with its reference (fr-schengen). POST /submissions"""
         return self._http.request("POST", f"/submissions", query=None, body=body, idempotency_key=idempotency_key)
 
     def get_submission(self, *, id: str) -> Any:
         """Where a submission stands, with the government reference once there is one. GET /submissions/{id}"""
         return self._http.request("GET", f"/submissions/{_q(id)}", query=None)
+
+    def get_submission_account(self, *, id: str) -> Any:
+        """ca-visitor and uk-visitor: the portal sign-in, and sign_url, the applicant's page to accept the declaration. GET /submissions/{id}/account"""
+        return self._http.request("GET", f"/submissions/{_q(id)}/account", query=None)
 
     def send_submission_code(self, *, id: str, body: Dict[str, Any]) -> Any:
         """us-ds160 with code_by partner: the US site's security code your staff read in code.image. POST /submissions/{id}/code"""
@@ -244,6 +276,10 @@ class Operations:
     def get_usage(self, *, month: Optional[Union[str, int]] = None) -> Any:
         """This month’s paid API use and what it comes to. GET /usage"""
         return self._http.request("GET", f"/usage", query={"month": month})
+
+    def list_visit_slots(self, *, site: Optional[Union[str, int]] = None) -> Any:
+        """From an agency's own website: the office visit times it may offer, from the agency's client hours, free times only. GET /visit-slots"""
+        return self._http.request("GET", f"/visit-slots", query={"site": site})
 
 
 def _q(v: str) -> str:
