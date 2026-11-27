@@ -2,6 +2,10 @@
 
 The Opaige API from Python 3.8 or later. Standard library only.
 
+```bash
+pip install opaige
+```
+
 ```python
 import os
 from opaige import Opaige, OpaigeError, verify_webhook
